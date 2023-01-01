@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "colors"
+version = "0.0.1.dev0"
+description = "Colors"
+authors = ["Wyatt Baldwin <Wyatt Baldwin>"]
+license = "MIT"
+readme = "README.md"
+
+packages = [
+    { include = "colors", from = "src" }
+]
+
+include = [
+    "CHANGELOG.md",
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+org-djangokit-core = "*"
+org-djangokit-cli = "*"
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+isort = "*"
+mypy = "*"
+pytest = "*"
+ruff = "*"
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
