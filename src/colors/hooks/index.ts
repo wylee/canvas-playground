@@ -1,23 +1,24 @@
 import { useEffect, useRef } from "react";
 
-export function useInterval(callback, delay, condition, name) {
-  const savedCallback = useRef<() => void>();
+export function useInterval(callback, condition, delay) {
+  const callbackRef = useRef<() => void>();
 
   useEffect(() => {
-    savedCallback.current = callback;
+    callbackRef.current = callback;
   }, [callback]);
 
+  // Run callback right away to avoid delayed start.
   useEffect(() => {
-    if (condition && savedCallback.current) {
-      savedCallback.current();
+    if (callbackRef.current && condition) {
+      callbackRef.current();
     }
-  }, []);
+  }, [condition]);
 
+  // Run callback periodically when condition is set.
   useEffect(() => {
-    if (condition && savedCallback.current) {
-      const tick = () => savedCallback.current?.();
-      const id = setInterval(tick, delay);
+    if (callbackRef.current && condition) {
+      const id = setInterval(() => callbackRef.current?.(), delay);
       return () => clearInterval(id);
     }
-  }, [delay, condition]);
+  }, [condition, delay]);
 }
