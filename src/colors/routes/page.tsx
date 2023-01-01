@@ -31,14 +31,20 @@ const RunState = styled.div`
   }
 `;
 
+function randIn(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [running, setRunning] = useState(false);
   const [bgColor, setBgColor] = useState(0);
 
-  const r = 32;
+  const r = 10;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
+  const [reverseX, setReverseX] = useState(false);
+  const [reverseY, setReverseY] = useState(false);
 
   const fgColor = (bgColor + 180) % 360;
   const backgroundColor = `hsl(${bgColor}, 100%, 50%)`;
@@ -55,12 +61,12 @@ export default function Page() {
     if (canvas) {
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
-      const [minX, maxX] = [r, Math.floor(w / 4) - r];
-      const [minY, maxY] = [r, Math.floor(h / 4) - r];
+      const [minX, maxX] = [r, randIn(r, w / 8)];
+      const [minY, maxY] = [r, randIn(r, h / 8)];
       canvas.width = w;
       canvas.height = h;
-      setX(Math.floor(Math.random() * (maxX - minX + 1)) + minX);
-      setY(Math.floor(Math.random() * (maxY - minY + 1)) + minY);
+      setX(randIn(minX, maxX));
+      setY(randIn(minY, maxY));
       setRunning(true);
     }
   }, []);
@@ -75,33 +81,66 @@ export default function Page() {
     "update background color"
   );
 
-  // Update circle position and color.
   useInterval(
     useCallback(() => {
       const canvas = canvasRef?.current;
       if (canvas) {
         const w = canvas.clientWidth;
         const h = canvas.clientHeight;
-        const c = 0.7;
-        const m = 0.2;
-        let newX = x + (Math.random() < c ? m : -m);
-        let newY = y + (Math.random() < c ? m : -m);
+
+        // Distance to move
+        let xm = Math.random();
+        let ym = Math.random();
+
+        // Weighting of whether to move in positive (right/down) or
+        // negative (left/up) direction. A larger number means greater
+        // probability of moving in the positive direction. The basic
+        // idea is to generally move right/down with a little gitter.
+        let xdp = 80 + randIn(-8, 8);
+        let ydp = 56 + randIn(-2, 2);
+
+        if (reverseX) {
+          xm = -xm;
+          ydp = xdp + randIn(-8, 8);
+        }
+        if (reverseY) {
+          ym = -ym;
+          xdp = ydp + randIn(-2, 2);
+        }
+
+        let newX = x + (randIn(0, 100) < xdp ? xm : -xm);
+        let newY = y + (randIn(0, 100) < ydp ? ym : -ym);
+
         if (newX < r) {
           newX = r;
         } else if (newX > w - r) {
           newX = w - r;
         }
+
         if (newY < r) {
           newY = r;
         } else if (newY > h - r) {
           newY = h - r;
         }
+
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.fillStyle = color;
           ctx.beginPath();
           ctx.arc(x, y, r, 0, Math.PI * 2, false);
           ctx.fill();
+        }
+        const lx = w - r;
+        const ly = h - r;
+        if (newX >= lx && !reverseX) {
+          setReverseX(true);
+        } else if (newX <= r && reverseX) {
+          setReverseX(false);
+        }
+        if (newY >= ly && !reverseY) {
+          setReverseY(true);
+        } else if (newY <= r && reverseY) {
+          setReverseY(false);
         }
         setX(newX);
         setY(newY);
