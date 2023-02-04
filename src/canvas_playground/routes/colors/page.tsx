@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
-import { useInterval } from "../hooks";
+import { useInterval, useRequestAnimationFrame } from "../../hooks";
 
 const TWO_PI = Math.PI * 2;
 
@@ -66,10 +66,48 @@ export default function Page() {
   );
 
   // Draw image.
-  useInterval(
+  useRequestAnimationFrame(
     useCallback(() => {
       const canvas = canvasRef?.current as HTMLCanvasElement;
-      setRadius(draw(canvas, radius, color));
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        return radius;
+      }
+
+      const [w, h] = [canvas.clientWidth, canvas.clientHeight];
+      const [cx, cy] = [Math.floor(w / 2), Math.floor(h / 2)];
+
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+
+      // Top left
+      ctx.beginPath();
+      ctx.arc(cx - radius, cy - radius, radius, 0, TWO_PI, false);
+      ctx.stroke();
+
+      // Top right
+      ctx.beginPath();
+      ctx.arc(cx + radius, cy - radius, radius, 0, TWO_PI, false);
+      ctx.stroke();
+
+      // Bottom right
+      ctx.beginPath();
+      ctx.arc(cx + radius, cy + radius, radius, 0, TWO_PI, false);
+      ctx.stroke();
+
+      // Bottom left
+      ctx.beginPath();
+      ctx.arc(cx - radius, cy + radius, radius, 0, TWO_PI, false);
+      ctx.stroke();
+
+      let newRadius = radius / 2;
+      if (newRadius < 8) {
+        newRadius = getInitialRadius(w, h) - randIn(4, Math.min(cx, cy) / 8);
+      }
+
+      setRadius(newRadius);
     }, [color, radius]),
     canvasRef?.current && running,
     50
@@ -110,45 +148,4 @@ function getInitialRadius(w, h) {
 
 function randIn(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function draw(canvas, radius, color) {
-  const ctx = canvas.getContext("2d");
-
-  if (!ctx) {
-    return radius;
-  }
-
-  const [w, h] = [canvas.clientWidth, canvas.clientHeight];
-  const [cx, cy] = [Math.floor(w / 2), Math.floor(h / 2)];
-
-  ctx.fillStyle = color;
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
-
-  // Top left
-  ctx.beginPath();
-  ctx.arc(cx - radius, cy - radius, radius, 0, TWO_PI, false);
-  ctx.stroke();
-
-  // Top right
-  ctx.beginPath();
-  ctx.arc(cx + radius, cy - radius, radius, 0, TWO_PI, false);
-  ctx.stroke();
-
-  // Bottom right
-  ctx.beginPath();
-  ctx.arc(cx + radius, cy + radius, radius, 0, TWO_PI, false);
-  ctx.stroke();
-
-  // Bottom left
-  ctx.beginPath();
-  ctx.arc(cx - radius, cy + radius, radius, 0, TWO_PI, false);
-  ctx.stroke();
-
-  let newRadius = radius / 2;
-  if (newRadius < 8) {
-    newRadius = getInitialRadius(w, h) - randIn(4, Math.min(cx, cy) / 8);
-  }
-  return newRadius;
 }

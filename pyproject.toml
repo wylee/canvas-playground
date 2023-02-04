@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "colors"
+name = "canvas-playground"
 version = "0.0.1.dev0"
-description = "Colors"
+description = "Canvas Playground"
 authors = ["Wyatt Baldwin <Wyatt Baldwin>"]
 license = "MIT"
 readme = "README.md"
 
 packages = [
-    { include = "colors", from = "src" }
+    { include = "canvas_playground", from = "src" }
 ]
 
 include = [
@@ -20,6 +20,9 @@ org-djangokit-core = "*"
 org-djangokit-cli = "*"
 
 [tool.poetry.group.dev.dependencies]
+org-djangokit-core = { path = "../djangokit/core", develop = true }
+org-djangokit-cli = { path = "../djangokit/cli", develop = true }
+
 black = "*"
 isort = "*"
 mypy = "*"

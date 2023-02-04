@@ -9,8 +9,8 @@
 # settings.<env>.toml file (e.g. settings.production.toml).
 
 [djangokit]
-package = "colors"
-title = "Colors"
-description = "Colors"
+package = "canvas_playground"
+title = "Canvas Playground"
+description = "Canvas Playground"
 global_stylesheets = ["bootstrap.css", "global.css"]
 ssr = false
